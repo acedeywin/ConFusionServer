@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import session from "express-session";
 import { default as SessionFileStore } from "session-file-store";
 import passport from "./authenticate.js";
+import config from "./config.js";
 
 const FileStore = SessionFileStore(session);
 
@@ -20,7 +21,7 @@ import leaderRouter from "./routes/leaderRouter.js";
 
 mongoose.set("useCreateIndex", true);
 
-const url = "mongodb://localhost:27017/conFusion";
+const url = config.mongoUrl;
 const connect = mongoose.connect(url, {
   useNewUrlParser: true,
   useFindAndModify: false,
@@ -48,33 +49,11 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser("12345-56789-91234-45678"));
-app.use(
-  session({
-    name: "session-id",
-    secret: "12345-56789-91234-45678",
-    saveUninitialized: false,
-    resave: false,
-    store: new FileStore(),
-  })
-);
 
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-
-const auth = (req, res, next) => {
-  if (!req.user) {
-    let err = new Error("You are not authenticated!");
-    err.status = 403;
-    return next(err);
-  } else {
-    next();
-  }
-};
-
-app.use(auth);
 
 app.use(express.static(__dirname + "/public"));
 
