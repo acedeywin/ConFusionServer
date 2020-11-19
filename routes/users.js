@@ -4,16 +4,26 @@ import passport from "passport";
 
 import User from "../models/user.js";
 import { getToken } from "../authenticate.js";
+import { verifyUser, verifyAdmin } from "../authenticate.js";
 
-const router = express.Router();
-router.use(bodyParser.json());
+const usersRouter = express.Router();
+usersRouter.use(bodyParser.json());
 
 /* GET users listing. */
-router.get("/", (req, res, next) => {
-  res.send("respond with a resource");
+usersRouter.get("/", verifyUser, verifyAdmin, (req, res, next) => {
+  User.find({})
+    .then(
+      (user) => {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.json(user);
+      },
+      (err) => next(err)
+    )
+    .catch((err) => next(err));
 });
 
-router.post("/signup", (req, res, next) => {
+usersRouter.post("/signup", (req, res, next) => {
   User.register(
     new User({ username: req.body.username }),
     req.body.password,
@@ -43,7 +53,7 @@ router.post("/signup", (req, res, next) => {
   );
 });
 
-router.post("/login", passport.authenticate("local"), (req, res) => {
+usersRouter.post("/login", passport.authenticate("local"), (req, res) => {
   let token = getToken({ _id: req.user._id });
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
@@ -54,7 +64,7 @@ router.post("/login", passport.authenticate("local"), (req, res) => {
   });
 });
 
-router.get("/logout", (req, res, next) => {
+usersRouter.get("/logout", (req, res, next) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie("session-id");
@@ -66,4 +76,4 @@ router.get("/logout", (req, res, next) => {
   }
 });
 
-export default router;
+export default usersRouter;

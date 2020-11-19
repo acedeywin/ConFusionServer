@@ -25,3 +25,5 @@ userSchema.plugin(passportLocal);
 let User = mongoose.model("User", userSchema);
 
 export default User;
+
+//db.users.update({"username": "admin"}, {$set: {"admin": true}})

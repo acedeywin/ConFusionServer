@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 
 import Dishes from "../models/dishes.js";
-import { verifyUser } from "../authenticate.js";
+import { verifyUser, verifyAdmin } from "../authenticate.js";
 
 const dishRouter = express.Router();
 
@@ -23,7 +23,7 @@ dishRouter
       )
       .catch((err) => next(err));
   })
-  .post(verifyUser, (req, res, next) => {
+  .post(verifyUser, verifyAdmin, (req, res, next) => {
     Dishes.create(req.body)
       .then(
         (dish) => {
@@ -36,11 +36,11 @@ dishRouter
       )
       .catch((err) => next(err));
   })
-  .put(verifyUser, (req, res, next) => {
+  .put(verifyUser, verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end(`PUT operation does not make sense on /dishes`);
   })
-  .delete(verifyUser, (req, res, next) => {
+  .delete(verifyUser, verifyAdmin, (req, res, next) => {
     Dishes.remove({})
       .then(
         (dishes) => {
@@ -69,11 +69,11 @@ dishRouter
       )
       .catch((err) => next(err));
   })
-  .post(verifyUser, (req, res, next) => {
+  .post(verifyUser, verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /dishes/${req.params.dishId}`);
   })
-  .put(verifyUser, (req, res, next) => {
+  .put(verifyUser, verifyAdmin, (req, res, next) => {
     Dishes.findByIdAndUpdate(
       req.params.dishId,
       {
@@ -91,7 +91,7 @@ dishRouter
       )
       .catch((err) => next(err));
   })
-  .delete(verifyUser, (req, res, next) => {
+  .delete(verifyUser, verifyAdmin, (req, res, next) => {
     Dishes.findByIdAndRemove(req.params.dishId)
       .then(
         (dish) => {
@@ -161,7 +161,7 @@ dishRouter
       `PUT operation does not make sense on /dishes/${req.params.dishId}/comments`
     );
   })
-  .delete(verifyUser, (req, res, next) => {
+  .delete(verifyUser, verifyAdmin, (req, res, next) => {
     Dishes.findById(req.params.dishId)
       .then(
         (dish) => {
@@ -225,6 +225,17 @@ dishRouter
       .then(
         (dish) => {
           if (dish != null && dish.comments.id(req.params.commentId) != null) {
+            //Allow a registered user to update his/her own comment
+            if (
+              dish.comments.id(req.params.commentId).author.toString() !=
+              req.user._id.toString()
+            ) {
+              let err = new Error(
+                "You are not authorized to edit this comment"
+              );
+              err.status = 403;
+              return next(err);
+            }
             if (req.body.rating) {
               dish.comments.id(req.params.commentId).rating = req.body.rating;
             }
@@ -262,6 +273,17 @@ dishRouter
       .then(
         (dish) => {
           if (dish != null && dish.comments.id(req.params.commentId) != null) {
+            //Allow a registered user to delete his/her own comment
+            if (
+              dish.comments.id(req.params.commentId).author.toString() !=
+              req.user._id.toString()
+            ) {
+              let err = new Error(
+                "You are not authorized to edit this comment"
+              );
+              err.status = 403;
+              return next(err);
+            }
             dish.comments.id(req.params.commentId).remove();
 
             dish.save().then(
@@ -277,11 +299,11 @@ dishRouter
               (err) => next(err)
             );
           } else if (dish == null) {
-            err = new Error(`Dish ${req.params.dishId} not found.`);
+            let err = new Error(`Dish ${req.params.dishId} not found.`);
             err.status = 404;
             return next(err);
           } else {
-            err = new Error(`Comment ${req.params.commentId} not found.`);
+            let err = new Error(`Comment ${req.params.commentId} not found.`);
             err.status = 404;
             return next(err);
           }
