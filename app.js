@@ -1,7 +1,6 @@
 import createError from "http-errors";
 import express from "express";
-import { dirname } from "path";
-import path from "path";
+import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 //import cookieParser from "cookie-parser";
 import logger from "morgan";
@@ -11,7 +10,7 @@ import { default as SessionFileStore } from "session-file-store";
 import passport from "./authenticate.js";
 import config from "./config.js";
 
-const FileStore = SessionFileStore(session);
+//const FileStore = SessionFileStore(session);
 
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
@@ -40,6 +39,17 @@ connect.then(
 const app = express(),
   __filename = fileURLToPath(import.meta.url),
   __dirname = dirname(__filename);
+
+app.all("*", (req, res, next) => {
+  if (req.secure) {
+    return next();
+  } else {
+    res.redirect(
+      307,
+      `https://${req.hostname}:${app.get("secPort")}${req.url}`
+    );
+  }
+});
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

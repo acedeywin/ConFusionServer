@@ -8,6 +8,10 @@ import app from "../app.js";
 import debug from "debug";
 ("confusionserver:server");
 import http from "http";
+import https from "https";
+import fs from "fs";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 /**
  * Get port from environment and store in Express.
@@ -15,12 +19,15 @@ import http from "http";
 
 const port = normalizePort(process.env.PORT || "5003");
 app.set("port", port);
+app.set("secPort", port + 443);
 
 /**
  * Create HTTP server.
  */
 
-const server = http.createServer(app);
+const server = http.createServer(app),
+  __filename = fileURLToPath(import.meta.url),
+  __dirname = dirname(__filename);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -31,6 +38,20 @@ server.listen(port, () => {
 });
 server.on("error", onError);
 server.on("listening", onListening);
+
+const options = {
+  key: fs.readFileSync(__dirname + "/private.key"),
+  cert: fs.readFileSync(__dirname + "/certificate.pem"),
+};
+
+const secureServer = https.createServer(options, app);
+
+secureServer.listen(app.get("secPort"), () => {
+  console.log("Server listening on port ", app.get("secPort"));
+});
+
+secureServer.on("error", onError);
+secureServer.on("listening", onListening);
 
 /**
  * Normalize a port into a number, string, or false.
