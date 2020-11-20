@@ -17,6 +17,7 @@ import usersRouter from "./routes/users.js";
 import dishRouter from "./routes/dishRouter.js";
 import promoRouter from "./routes/promoRouter.js";
 import leaderRouter from "./routes/leaderRouter.js";
+import uploadRouter from "./routes/uploadRouter.js";
 
 mongoose.set("useCreateIndex", true);
 
@@ -70,6 +71,7 @@ app.use(express.static(__dirname + "/public"));
 app.use("/dishes", dishRouter);
 app.use("/promotions", promoRouter);
 app.use("/leaders", leaderRouter);
+app.use("/imageUpload", uploadRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
