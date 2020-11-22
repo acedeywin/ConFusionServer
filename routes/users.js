@@ -2,28 +2,34 @@ import express from "express";
 import bodyParser from "body-parser";
 import passport from "passport";
 
+import * as corsDefault from "./cors.js";
 import User from "../models/user.js";
-import { getToken } from "../authenticate.js";
-import { verifyUser, verifyAdmin } from "../authenticate.js";
+import { getToken, verifyUser, verifyAdmin } from "../authenticate.js";
 
 const usersRouter = express.Router();
 usersRouter.use(bodyParser.json());
 
 /* GET users listing. */
-usersRouter.get("/", verifyUser, verifyAdmin, (req, res, next) => {
-  User.find({})
-    .then(
-      (user) => {
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.json(user);
-      },
-      (err) => next(err)
-    )
-    .catch((err) => next(err));
-});
+usersRouter.get(
+  "/",
+  corsDefault.corsWithOptions,
+  verifyUser,
+  verifyAdmin,
+  (req, res, next) => {
+    User.find({})
+      .then(
+        (user) => {
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.json(user);
+        },
+        (err) => next(err)
+      )
+      .catch((err) => next(err));
+  }
+);
 
-usersRouter.post("/signup", (req, res, next) => {
+usersRouter.post("/signup", corsDefault.corsWithOptions, (req, res, next) => {
   User.register(
     new User({ username: req.body.username }),
     req.body.password,
@@ -53,16 +59,21 @@ usersRouter.post("/signup", (req, res, next) => {
   );
 });
 
-usersRouter.post("/login", passport.authenticate("local"), (req, res) => {
-  let token = getToken({ _id: req.user._id });
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "application/json");
-  res.json({
-    success: true,
-    token,
-    status: "You are successfully logged in.",
-  });
-});
+usersRouter.post(
+  "/login",
+  corsDefault.corsWithOptions,
+  passport.authenticate("local"),
+  (req, res) => {
+    let token = getToken({ _id: req.user._id });
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json({
+      success: true,
+      token,
+      status: "You are successfully logged in.",
+    });
+  }
+);
 
 usersRouter.get("/logout", (req, res, next) => {
   if (req.session) {

@@ -1,9 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { verifyUser, verifyAdmin } from "../authenticate.js";
 import multer from "multer";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+
+import * as corsDefault from "./cors.js";
+import { verifyUser, verifyAdmin } from "../authenticate.js";
 
 const __filename = fileURLToPath(import.meta.url),
   __dirname = dirname(__filename);
@@ -32,22 +34,41 @@ uploadRouter.use(bodyParser.json());
 
 uploadRouter
   .route("/")
-  .get(verifyUser, verifyAdmin, (req, res, next) => {
+  .options(corsDefault.corsWithOptions, (req, res) => {
+    res.sendStatus(200);
+  })
+  .get(corsDefault.mainCors, verifyUser, verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end(`Get operation does not make sense on /imageUpload`);
   })
-  .post(verifyUser, verifyAdmin, upload.single("imageFile"), (req, res) => {
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
-    res.json(req.file);
-  })
-  .put(verifyUser, verifyAdmin, (req, res, next) => {
-    res.statusCode = 403;
-    res.end(`PUT operation does not make sense on /imageUpload`);
-  })
-  .delete(verifyUser, verifyAdmin, (req, res, next) => {
-    res.statusCode = 403;
-    res.end(`DELETE operation does not make sense on /imageUpload`);
-  });
+  .post(
+    corsDefault.corsWithOptions,
+    verifyUser,
+    verifyAdmin,
+    upload.single("imageFile"),
+    (req, res) => {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.json(req.file);
+    }
+  )
+  .put(
+    corsDefault.corsWithOptions,
+    verifyUser,
+    verifyAdmin,
+    (req, res, next) => {
+      res.statusCode = 403;
+      res.end(`PUT operation does not make sense on /imageUpload`);
+    }
+  )
+  .delete(
+    corsDefault.corsWithOptions,
+    verifyUser,
+    verifyAdmin,
+    (req, res, next) => {
+      res.statusCode = 403;
+      res.end(`DELETE operation does not make sense on /imageUpload`);
+    }
+  );
 
 export default uploadRouter;
