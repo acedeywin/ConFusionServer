@@ -87,4 +87,21 @@ usersRouter.get("/logout", (req, res, next) => {
   }
 });
 
+usersRouter.get(
+  "/facebook/token",
+  passport.authenticate("facebook-token"),
+  (req, res) => {
+    if (req.user) {
+      let token = getToken({ _id: req.user._id });
+      res.sendStatus = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.json({
+        success: true,
+        token,
+        status: "You are successfully logged in!",
+      });
+    }
+  }
+);
+
 export default usersRouter;

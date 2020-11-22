@@ -3,6 +3,7 @@ import passportStrategy from "passport-local";
 import jsonStrategy from "passport-jwt";
 import extract from "passport-jwt";
 import jwt from "jsonwebtoken";
+import FacebookStrategy from "passport-facebook-token";
 
 import User from "./models/user.js";
 import config from "./config.js";
@@ -49,3 +50,34 @@ export const verifyAdmin = (req, res, next) => {
     return next(err);
   }
 };
+
+export const facebookPassport = passport.use(
+  new FacebookStrategy(
+    {
+      clientID: config.facebook.clientId,
+      clientSecret: config.facebook.clientSecret,
+    },
+    (accessToken, refreshToken, profile, done) => {
+      User.findOne({ facebookId: profile.id }, (err, user) => {
+        if (err) {
+          return done(err, false);
+        }
+        if (!err && user !== null) {
+          return done(null, user);
+        } else {
+          user = new User({ username: profile.displayName });
+          user.facebookId = profile.id;
+          user.firstname = profile.name.givenName;
+          user.lastname = profile.name.familyName;
+          user.save(err, (user) => {
+            if (err) {
+              return done(err, false);
+            } else {
+              return done(null, user);
+            }
+          });
+        }
+      });
+    }
+  )
+);
