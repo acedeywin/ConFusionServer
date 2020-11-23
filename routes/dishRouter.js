@@ -14,7 +14,7 @@ dishRouter
   .options(corsDefault.corsWithOptions, (req, res) => {
     res.sendStatus(200);
   })
-  .get(corsDefault.mainCors, (req, res, next) => {
+  .get(corsDefault.mainCors, verifyUser, (req, res, next) => {
     Dishes.find({})
       .populate("comments.author")
       .then(

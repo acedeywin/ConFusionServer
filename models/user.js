@@ -5,7 +5,7 @@ const passportLocal = passportLocalMongoose;
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
+export const userSchema = new Schema({
   firstname: {
     type: String,
     default: "",

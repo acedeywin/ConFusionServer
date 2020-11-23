@@ -18,6 +18,7 @@ import dishRouter from "./routes/dishRouter.js";
 import promoRouter from "./routes/promoRouter.js";
 import leaderRouter from "./routes/leaderRouter.js";
 import uploadRouter from "./routes/uploadRouter.js";
+import favoritesRouter from "./routes/favoritesRoute.js";
 
 mongoose.set("useCreateIndex", true);
 
@@ -72,6 +73,7 @@ app.use("/dishes", dishRouter);
 app.use("/promotions", promoRouter);
 app.use("/leaders", leaderRouter);
 app.use("/imageUpload", uploadRouter);
+app.use("/favorites", favoritesRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

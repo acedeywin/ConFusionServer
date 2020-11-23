@@ -6,7 +6,7 @@ mongooseCurrency.loadType(mongoose);
 const Currency = mongoose.Types.Currency;
 const Schema = mongoose.Schema;
 
-const commentSchema = new Schema(
+export const commentSchema = new Schema(
   {
     rating: {
       type: Number,
@@ -28,7 +28,7 @@ const commentSchema = new Schema(
   }
 );
 
-const dishSchema = new Schema(
+export const dishSchema = new Schema(
   {
     name: {
       type: String,

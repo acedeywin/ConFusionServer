@@ -34,7 +34,7 @@ leaderRouter
       Leaders.create(req.body)
         .then(
           (leader) => {
-            console.log("leadertion created", leader);
+            console.log("leader created", leader);
             res.statusCode = 200;
             res.setHeader("Content-Type", "application/json");
             res.json(leader);
