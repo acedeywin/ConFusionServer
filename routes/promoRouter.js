@@ -15,7 +15,7 @@ promoRouter
     res.sendStatus(200);
   })
   .get(corsDefault.mainCors, (req, res, next) => {
-    Promotions.find({})
+    Promotions.find(req.query)
       .then(
         (promo) => {
           res.statusCode = 200;

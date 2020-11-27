@@ -6,28 +6,6 @@ mongooseCurrency.loadType(mongoose);
 const Currency = mongoose.Types.Currency;
 const Schema = mongoose.Schema;
 
-export const commentSchema = new Schema(
-  {
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-      required: true,
-    },
-    comment: {
-      type: String,
-      required: true,
-    },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
 export const dishSchema = new Schema(
   {
     name: {
@@ -60,7 +38,6 @@ export const dishSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    comments: [commentSchema],
   },
   {
     timestamps: true,

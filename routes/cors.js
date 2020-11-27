@@ -1,6 +1,10 @@
 import cors from "cors";
 
-const whitelist = ["http://localhost:5003", "https://localhost:5003"];
+const whitelist = [
+  "http://localhost:5003",
+  "https://localhost:5446",
+  "http://Ifeamarame-PC:5001",
+];
 
 const corsOptionDelegate = (req, callback) => {
   let corsOptions;

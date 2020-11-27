@@ -71,11 +71,15 @@ favoritesRouter
         user
           .save()
           .then(
-            (userFavs) => {
-              res.statusCode = 201;
-              res.setHeader("Content-Type", "application/json");
-              res.json(userFavs);
-              console.log("Favorites Created");
+            (favorite) => {
+              Favorites.findById(favorite._id)
+                .populate("user")
+                .populate("dishes")
+                .then((favorite) => {
+                  res.statusCode = 200;
+                  res.setHeader("Content-Type", "application/json");
+                  res.json(favorite);
+                });
             },
             (err) => next(err)
           )
@@ -103,9 +107,14 @@ favoritesRouter
           if (removeFavorites) {
             removeFavorites.remove().then(
               (favorite) => {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.json(favorite);
+                Favorites.findById(favorite._id)
+                  .populate("user")
+                  .populate("dishes")
+                  .then((favorite) => {
+                    res.statusCode = 200;
+                    res.setHeader("Content-Type", "application/json");
+                    res.json(favorite);
+                  });
               },
               (err) => next(err)
             );
@@ -121,11 +130,35 @@ favoritesRouter
   });
 
 favoritesRouter
-  .route("/dishId")
+  .route("/:dishId")
   .options(corsDefault.corsWithOptions, (req, res) => {
     res.sendStatus(200);
   })
-  .post(corsDefault.mainCors, verifyUser, (req, res, next) => {
+  .get(corsDefault.mainCors, verifyUser, (req, res, next) => {
+    Favorites.findOne({ user: req.user._id })
+      .then(
+        (favorites) => {
+          if (!favorites) {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            return res.json({ exists: false, favorites: favorites });
+          } else {
+            if (favorites.dishes.indexOf(req.params.dishId) < 0) {
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "application/json");
+              return res.json({ exists: false, favorites: favorites });
+            } else {
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "application/json");
+              return res.json({ exists: true, favorites: favorites });
+            }
+          }
+        },
+        (err) => next(err)
+      )
+      .catch((err) => next(err));
+  })
+  .post(corsDefault.corsWithOptions, verifyUser, (req, res, next) => {
     Favorites.find({})
       .populate("user")
       .populate("dishes")
@@ -149,10 +182,14 @@ favoritesRouter
           .save()
           .then(
             (favorite) => {
-              res.statusCode = 201;
-              res.setHeader("Content-Type", "application/json");
-              res.json(favorite);
-              console.log("Favorites Created");
+              Favorites.findById(favorite._id)
+                .populate("user")
+                .populate("dishes")
+                .then((favorite) => {
+                  res.statusCode = 200;
+                  res.setHeader("Content-Type", "application/json");
+                  res.json(favorite);
+                });
             },
             (err) => next(err)
           )
@@ -178,9 +215,14 @@ favoritesRouter
             );
             user.save().then(
               (favorite) => {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.json(favorite);
+                Favorites.findById(favorite._id)
+                  .populate("user")
+                  .populate("dishes")
+                  .then((favorite) => {
+                    res.statusCode = 200;
+                    res.setHeader("Content-Type", "application/json");
+                    res.json(favorite);
+                  });
               },
               (err) => next(err)
             );
