@@ -17,7 +17,7 @@ import { fileURLToPath } from "url";
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || "5003");
+const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 app.set("secPort", port + 443);
 
